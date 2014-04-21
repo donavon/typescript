@@ -33446,6 +33446,20 @@ var TypeScript;
                         normalizedPath = tsFile;
                         break;
                     }
+
+                    normalizedPath = parentDirectory + "/Modules/" + path;
+                    dtsFile = normalizedPath + ".d.ts";
+                    tsFile = normalizedPath + ".ts";
+
+                    if (this.host.fileExists(normalizedPath)) {
+                        break;
+                    } else if (this.host.fileExists(dtsFile)) {
+                        normalizedPath = dtsFile;
+                        break;
+                    } else if (this.host.fileExists(tsFile)) {
+                        normalizedPath = tsFile;
+                        break;
+                    }
                 } while(parentDirectory = this.host.getParentDirectory(parentDirectory));
 
                 if (!this.host.fileExists(normalizedPath)) {
@@ -33469,29 +33483,55 @@ var TypeScript;
                 var searchFilePath = null;
                 var dtsFileName = path + ".d.ts";
                 var tsFilePath = path + ".ts";
+                var nodeDtsFileName = dtsFileName;
+                var nodeTsFilePath = tsFilePath;
 
                 var start = new Date().getTime();
 
                 do {
-                    currentFilePath = this.host.resolveRelativePath(tsFilePath, parentDirectory);
+                    var currentFilePath = this.host.resolveRelativePath(tsFilePath, parentDirectory);
                     if (this.host.fileExists(currentFilePath)) {
                         searchFilePath = currentFilePath;
                         break;
                     }
 
-                    var currentFilePath = this.host.resolveRelativePath(dtsFileName, parentDirectory);
+                    currentFilePath = this.host.resolveRelativePath(dtsFileName, parentDirectory);
                     if (this.host.fileExists(currentFilePath)) {
                         searchFilePath = currentFilePath;
                         break;
                     }
 
-                    currentFilePath = this.host.resolveRelativePath("node_modules/" + dtsFileName, parentDirectory);
+                    currentFilePath = this.host.resolveRelativePath("node_modules/" + path, parentDirectory);
+                    if (this.host.directoryExists(currentFilePath)) {
+                        nodeDtsFileName = path + "/index.d.ts";
+                        nodeTsFilePath = path + "/index.ts";
+                    } else {
+                        currentFilePath = this.host.resolveRelativePath("Modules/" + path, parentDirectory);
+                        if (this.host.directoryExists(currentFilePath)) {
+                            nodeDtsFileName = path + "/index.d.ts";
+                            nodeTsFilePath = path + "/index.ts";
+                        }
+                    }
+
+                    currentFilePath = this.host.resolveRelativePath("node_modules/" + nodeDtsFileName, parentDirectory);
                     if (this.host.fileExists(currentFilePath)) {
                         searchFilePath = currentFilePath;
                         break;
                     }
 
-                    currentFilePath = this.host.resolveRelativePath("node_modules/" + tsFilePath, parentDirectory);
+                    currentFilePath = this.host.resolveRelativePath("node_modules/" + nodeTsFilePath, parentDirectory);
+                    if (this.host.fileExists(currentFilePath)) {
+                        searchFilePath = currentFilePath;
+                        break;
+                    }
+
+                    currentFilePath = this.host.resolveRelativePath("Modules/" + nodeDtsFileName, parentDirectory);
+                    if (this.host.fileExists(currentFilePath)) {
+                        searchFilePath = currentFilePath;
+                        break;
+                    }
+
+                    currentFilePath = this.host.resolveRelativePath("Modules/" + nodeTsFilePath, parentDirectory);
                     if (this.host.fileExists(currentFilePath)) {
                         searchFilePath = currentFilePath;
                         break;
@@ -40453,6 +40493,18 @@ var TypeScript;
 
                         if (symbol === null) {
                             symbol = this.semanticInfoChain.findExternalModule(path + "node_modules/" + idText);
+                        }
+
+                        if (symbol === null) {
+                            symbol = this.semanticInfoChain.findExternalModule(path + "Modules/" + idText);
+                        }
+
+                        if (symbol === null) {
+                            symbol = this.semanticInfoChain.findExternalModule(path + "node_modules/" + idText + "/index");
+                        }
+
+                        if (symbol === null) {
+                            symbol = this.semanticInfoChain.findExternalModule(path + "Modules/" + idText + "/index");
                         }
 
                         if (symbol === null) {

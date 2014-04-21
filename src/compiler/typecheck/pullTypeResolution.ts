@@ -896,6 +896,18 @@ module TypeScript {
                         }
 
                         if (symbol === null) {
+                            symbol = this.semanticInfoChain.findExternalModule(path + "Modules/" + idText);
+                        }
+
+                        if (symbol === null) {
+                            symbol = this.semanticInfoChain.findExternalModule(path + "node_modules/" + idText + "/index");
+                        }
+ 
+                        if (symbol === null) {
+                            symbol = this.semanticInfoChain.findExternalModule(path + "Modules/" + idText + "/index");
+                        } 
+
+                        if (symbol === null) {
                             if (path === '/') {
                                 path = '';
                             }
