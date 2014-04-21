@@ -33511,11 +33511,33 @@ var TypeScript;
             }
 
             if (!this.host.fileExists(normalizedPath)) {
-                if (!referenceLocation.isImported) {
-                    resolutionResult.diagnostics.push(new TypeScript.Diagnostic(referenceLocation.filePath, referenceLocation.lineMap, referenceLocation.position, referenceLocation.length, TypeScript.DiagnosticCode.Cannot_resolve_referenced_file_0, [path]));
+                if (referenceLocation.isImported) {
+                    return normalizedPath;
                 }
 
-                return normalizedPath;
+                var parentDirectory = normalizedPath;
+
+                do {
+                    var normalizedPath = parentDirectory + "/node_modules/" + path;
+                    var dtsFile = normalizedPath + ".d.ts";
+                    var tsFile = normalizedPath + ".ts";
+
+                    if (this.host.fileExists(normalizedPath)) {
+                        break;
+                    } else if (this.host.fileExists(dtsFile)) {
+                        normalizedPath = dtsFile;
+                        break;
+                    } else if (this.host.fileExists(tsFile)) {
+                        normalizedPath = tsFile;
+                        break;
+                    }
+                } while(parentDirectory = this.host.getParentDirectory(parentDirectory));
+
+                if (!this.host.fileExists(normalizedPath)) {
+                    resolutionResult.diagnostics.push(new TypeScript.Diagnostic(referenceLocation.filePath, referenceLocation.lineMap, referenceLocation.position, referenceLocation.length, TypeScript.DiagnosticCode.Cannot_resolve_referenced_file_0, [path]));
+
+                    return '';
+                }
             }
 
             return this.resolveFile(normalizedPath, resolutionResult);
@@ -33543,6 +33565,18 @@ var TypeScript;
                     }
 
                     var currentFilePath = this.host.resolveRelativePath(dtsFileName, parentDirectory);
+                    if (this.host.fileExists(currentFilePath)) {
+                        searchFilePath = currentFilePath;
+                        break;
+                    }
+
+                    currentFilePath = this.host.resolveRelativePath("node_modules/" + dtsFileName, parentDirectory);
+                    if (this.host.fileExists(currentFilePath)) {
+                        searchFilePath = currentFilePath;
+                        break;
+                    }
+
+                    currentFilePath = this.host.resolveRelativePath("node_modules/" + tsFilePath, parentDirectory);
                     if (this.host.fileExists(currentFilePath)) {
                         searchFilePath = currentFilePath;
                         break;
@@ -40501,6 +40535,11 @@ var TypeScript;
 
                     while (symbol === null && path != "") {
                         symbol = this.semanticInfoChain.findExternalModule(path + idText);
+
+                        if (symbol === null) {
+                            symbol = this.semanticInfoChain.findExternalModule(path + "node_modules/" + idText);
+                        }
+
                         if (symbol === null) {
                             if (path === '/') {
                                 path = '';
