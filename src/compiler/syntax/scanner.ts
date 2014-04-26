@@ -467,6 +467,7 @@ module TypeScript {
             switch (character) {
                 case CharacterCodes.doubleQuote:
                 case CharacterCodes.singleQuote:
+                case CharacterCodes.backtick:
                     return this.scanStringLiteral(diagnostics);
 
                 // These are the set of variable width punctuation tokens.
@@ -1152,7 +1153,7 @@ module TypeScript {
                     this.slidingWindow.moveToNextItem();
                     break;
                 }
-                else if (this.isNewLineCharacter(ch) || this.slidingWindow.isAtEndOfSource()) {
+                else if ((this.isNewLineCharacter(ch) && quoteCharacter != CharacterCodes.backtick) || this.slidingWindow.isAtEndOfSource()) {
                     diagnostics.push(new Diagnostic(this.fileName, this.text.lineMap(),
                         MathPrototype.min(this.slidingWindow.absoluteIndex(), this.text.length()), 1, DiagnosticCode.Missing_close_quote_character, null));
                     break;

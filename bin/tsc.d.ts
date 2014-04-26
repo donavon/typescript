@@ -840,6 +840,7 @@ declare module TypeScript {
         singleQuote = 39,
         slash = 47,
         tilde = 126,
+        backtick = 96,
         backspace = 8,
         formFeed = 12,
         byteOrderMark = 65279,

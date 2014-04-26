@@ -3323,7 +3323,22 @@ module TypeScript {
         }
 
         public emitStringLiteral(literal: StringLiteral): void {
-            this.writeToOutputWithSourceMapRecord(literal.text(), literal);
+            var text = literal.text();
+            
+            if (text.charAt(0) == "`") {
+                text = "'" + text.substr(1, text.length - 2) + "'";
+                text = text.replace(/(\r?\n)/g, "\\n' +$1'");
+                text = text.replace(/(\\*)\$\{([^}]+)\}/g, function(literal, slashes, expression) {
+                    if (slashes.length % 2) {
+                        return literal.substr(1);
+                    }
+
+                    return slashes + "' + (" + expression + ") + '";
+                });
+                text = "(" + text + ")";
+            }
+
+            this.writeToOutputWithSourceMapRecord(text, literal);
         }
 
         public emitEqualsValueClause(clause: EqualsValueClause): void {

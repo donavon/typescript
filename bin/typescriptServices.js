@@ -4051,6 +4051,7 @@ var TypeScript;
         CharacterCodes[CharacterCodes["singleQuote"] = 39] = "singleQuote";
         CharacterCodes[CharacterCodes["slash"] = 47] = "slash";
         CharacterCodes[CharacterCodes["tilde"] = 126] = "tilde";
+        CharacterCodes[CharacterCodes["backtick"] = 96] = "backtick";
 
         CharacterCodes[CharacterCodes["backspace"] = 8] = "backspace";
         CharacterCodes[CharacterCodes["formFeed"] = 12] = "formFeed";
@@ -6583,6 +6584,7 @@ var TypeScript;
             switch (character) {
                 case 34 /* doubleQuote */:
                 case 39 /* singleQuote */:
+                case 96 /* backtick */:
                     return this.scanStringLiteral(diagnostics);
 
                 case 47 /* slash */:
@@ -7141,7 +7143,7 @@ var TypeScript;
                 } else if (ch === quoteCharacter) {
                     this.slidingWindow.moveToNextItem();
                     break;
-                } else if (this.isNewLineCharacter(ch) || this.slidingWindow.isAtEndOfSource()) {
+                } else if ((this.isNewLineCharacter(ch) && quoteCharacter != 96 /* backtick */) || this.slidingWindow.isAtEndOfSource()) {
                     diagnostics.push(new TypeScript.Diagnostic(this.fileName, this.text.lineMap(), TypeScript.MathPrototype.min(this.slidingWindow.absoluteIndex(), this.text.length()), 1, TypeScript.DiagnosticCode.Missing_close_quote_character, null));
                     break;
                 } else {
@@ -32606,7 +32608,22 @@ var TypeScript;
         };
 
         Emitter.prototype.emitStringLiteral = function (literal) {
-            this.writeToOutputWithSourceMapRecord(literal.text(), literal);
+            var text = literal.text();
+
+            if (text.charAt(0) == "`") {
+                text = "'" + text.substr(1, text.length - 2) + "'";
+                text = text.replace(/(\r?\n)/g, "\\n' +$1'");
+                text = text.replace(/(\\*)\$\{([^}]+)\}/g, function (literal, slashes, expression) {
+                    if (slashes.length % 2) {
+                        return literal.substr(1);
+                    }
+
+                    return slashes + "' + (" + expression + ") + '";
+                });
+                text = "(" + text + ")";
+            }
+
+            this.writeToOutputWithSourceMapRecord(text, literal);
         };
 
         Emitter.prototype.emitEqualsValueClause = function (clause) {
