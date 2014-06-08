@@ -1440,6 +1440,7 @@ module TypeScript.Parser {
                 case SyntaxKind.GreaterThanOrEqualExpression:
                 case SyntaxKind.InstanceOfExpression:
                 case SyntaxKind.InExpression:
+                case SyntaxKind.OfExpression:
                     return ExpressionPrecedence.RelationalExpressionPrecedence;
 
                 case SyntaxKind.LeftShiftExpression:
@@ -2959,7 +2960,7 @@ module TypeScript.Parser {
 
             var variableDeclaration = this.parseVariableDeclaration(/*allowIn:*/ false);
 
-            if (this.currentToken().tokenKind === SyntaxKind.InKeyword) {
+            if (this.currentToken().tokenKind === SyntaxKind.InKeyword || this.currentToken().tokenKind === SyntaxKind.OfKeyword) {
                 return this.parseForInStatementWithVariableDeclarationOrInitializer(forKeyword, openParenToken, variableDeclaration, null);
             }
 
@@ -2974,13 +2975,13 @@ module TypeScript.Parser {
             // Debug.assert(this.currentToken().tokenKind === SyntaxKind.InKeyword);
 
             // for ( var VariableDeclarationNoIn in Expression ) Statement
-            var inKeyword = this.eatKeyword(SyntaxKind.InKeyword);
+            var inOrOfKeyword = this.eatKeyword(this.currentToken().tokenKind);
             var expression = this.parseExpression(/*allowIn:*/ true);
             var closeParenToken = this.eatToken(SyntaxKind.CloseParenToken);
             var statement = this.parseStatement(/*inErrorRecovery:*/ false);
 
             return this.factory.forInStatement(forKeyword, openParenToken, variableDeclaration,
-                initializer, inKeyword, expression, closeParenToken, statement);
+                initializer, inOrOfKeyword, expression, closeParenToken, statement);
         }
 
         private parseForOrForInStatementWithInitializer(forKeyword: ISyntaxToken, openParenToken: ISyntaxToken): IIterationStatementSyntax {
@@ -2990,7 +2991,7 @@ module TypeScript.Parser {
             // for ( LeftHandSideExpression in Expression ) Statement
 
             var initializer = this.parseExpression(/*allowIn:*/ false);
-            if (this.currentToken().tokenKind === SyntaxKind.InKeyword) {
+            if (this.currentToken().tokenKind === SyntaxKind.InKeyword || this.currentToken().tokenKind === SyntaxKind.OfKeyword) {
                 return this.parseForInStatementWithVariableDeclarationOrInitializer(forKeyword, openParenToken, null, initializer);
             }
             else {
@@ -3543,7 +3544,7 @@ module TypeScript.Parser {
                 // Check for binary expressions.
                 if (SyntaxFacts.isBinaryExpressionOperatorToken(token0Kind)) {
                     // also, if it's the 'in' operator, only allow if our caller allows it.
-                    if (token0Kind === SyntaxKind.InKeyword && !allowIn) {
+                    if (!allowIn && (token0Kind === SyntaxKind.InKeyword || SyntaxKind.OfKeyword)) {
                         break;
                     }
 
@@ -5324,7 +5325,7 @@ module TypeScript.Parser {
                 return true;
             }
 
-            if (this.currentToken().tokenKind === SyntaxKind.InKeyword) {
+            if (this.currentToken().tokenKind === SyntaxKind.InKeyword || this.currentToken().tokenKind === SyntaxKind.OfKeyword) {
                 return true;
             }
 

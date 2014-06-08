@@ -2924,7 +2924,6 @@ module TypeScript {
             typeExpr: AST,
             init: EqualsValueClause,
             context: PullTypeResolutionContext): PullSymbol {
-
             var hasTypeExpr = typeExpr !== null || varDeclOrParameter.kind() === SyntaxKind.EnumElement;
             var enclosingDecl = this.getEnclosingDeclForAST(varDeclOrParameter);
             var decl = this.semanticInfoChain.getDeclForAST(varDeclOrParameter);
@@ -5132,7 +5131,7 @@ module TypeScript {
                 if (declaration.declarators.nonSeparatorCount() === 1) {
                     var varDecl = <VariableDeclarator>declaration.declarators.nonSeparatorAt(0);
 
-                    if (varDecl.typeAnnotation) {
+                    if (varDecl.typeAnnotation && forInStatement.inOrOf.tokenKind === SyntaxKind.InKeyword) {
                         // November 18, 2013
                         // VarDecl must be a variable declaration without a type annotation.
                         context.postDiagnostic(this.semanticInfoChain.diagnosticFromAST(declaration, DiagnosticCode.Variable_declarations_of_a_for_statement_cannot_use_a_type_annotation));
@@ -5993,6 +5992,16 @@ module TypeScript {
                     return this.semanticInfoChain.numberTypeSymbol;
 
                 case SyntaxKind.StringLiteral:
+                    var text = (<StringLiteral>ast).text();
+                    
+                    if (text.charAt(0) == "`") {
+                        var exprs = text.match(/(^|[^\\])(\\\\)*\{[^}]+\}/g);
+                        
+                        if (exprs.length && /\bthis\b/.test(exprs.join())) {
+                            this.checkForThisCaptureInArrowFunction(ast);
+                        }
+                    }
+                    
                     return this.semanticInfoChain.stringTypeSymbol;
 
                 case SyntaxKind.NullKeyword:

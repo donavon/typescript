@@ -498,6 +498,7 @@ module TypeScript {
     childrenWalkers[SyntaxKind.IndexMemberDeclaration] = walkIndexMemberDeclarationChildren;
     childrenWalkers[SyntaxKind.IndexSignature] = walkIndexSignatureChildren;
     childrenWalkers[SyntaxKind.InExpression] = walkBinaryExpressionChildren;
+    childrenWalkers[SyntaxKind.OfExpression] = walkBinaryExpressionChildren;
     childrenWalkers[SyntaxKind.InstanceOfExpression] = walkBinaryExpressionChildren;
     childrenWalkers[SyntaxKind.InterfaceDeclaration] = walkInterfaceDeclerationChildren;
     childrenWalkers[SyntaxKind.InvocationExpression] = walkInvocationExpressionChildren;

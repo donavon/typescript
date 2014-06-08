@@ -29,6 +29,7 @@ module TypeScript.SyntaxFacts {
         "implements": SyntaxKind.ImplementsKeyword,
         "import": SyntaxKind.ImportKeyword,
         "in": SyntaxKind.InKeyword,
+        "of": SyntaxKind.OfKeyword,
         "instanceof": SyntaxKind.InstanceOfKeyword,
         "interface": SyntaxKind.InterfaceKeyword,
         "let": SyntaxKind.LetKeyword,
@@ -249,6 +250,9 @@ module TypeScript.SyntaxFacts {
             case SyntaxKind.InKeyword:
                 return SyntaxKind.InExpression;
 
+            case SyntaxKind.OfKeyword:
+                return SyntaxKind.OfExpression;
+
             case SyntaxKind.EqualsEqualsToken:
                 return SyntaxKind.EqualsWithTypeConversionExpression;
 
@@ -363,6 +367,9 @@ module TypeScript.SyntaxFacts {
 
             case SyntaxKind.InExpression:
                 return SyntaxKind.InKeyword;
+
+            case SyntaxKind.OfExpression:
+                return SyntaxKind.OfKeyword;
 
             case SyntaxKind.EqualsWithTypeConversionExpression:
                 return SyntaxKind.EqualsEqualsToken;

@@ -226,6 +226,7 @@ module TypeScript {
         private declStack: PullDecl[] = [];
         private exportAssignment: ExportAssignment = null;
         private inWithBlock = false;
+        private omitBeginParen = false;
 
         public document: Document = null;
 
@@ -3077,7 +3078,9 @@ module TypeScript {
 
         public emitBlock(block: Block): void {
             this.recordSourceMappingStart(block);
-            this.writeLineToOutput(" {");
+            if (!this.omitBeginParen) {
+                this.writeLineToOutput(" {");
+            }
             this.indenter.increaseIndent();
             if (block.statements) {
                 this.emitList(block.statements);
@@ -3182,17 +3185,51 @@ module TypeScript {
 
         public emitForInStatement(statement: ForInStatement): void {
             this.recordSourceMappingStart(statement);
+            var isInKeyword = statement.inOrOf.tokenKind === SyntaxKind.InKeyword;
+            
+            if (statement.left && !isInKeyword) {
+                this.writeToOutput("var __i, __e, __l;");
+            }
+            
             this.writeToOutput("for (");
+            var addEndParen = false;
+            
             if (statement.left) {
                 this.emit(statement.left);
             }
             else {
                 this.emit(statement.variableDeclaration);
             }
-            this.writeToOutput(" in ");
-            this.emit(statement.expression);
-            this.writeToOutput(")");
+            
+            if (isInKeyword) {
+                this.writeToOutput(" in ");
+                this.emit(statement.expression);
+                this.writeToOutput(")");
+            } else {
+                this.writeToOutput(", __i = 0, __v = ");
+                this.emit(statement.expression);
+                
+                if (statement.left) {
+                    var left: any = statement.left;
+                    var name = left.text();
+                } else {
+                    var declarator: any = statement.variableDeclaration.declarators.nonSeparatorAt(0);
+                    var name = declarator.propertyName.text();
+                }
+
+                this.writeLineToOutput(", __l = __v.length; __i < __l; __i++) {");
+                this.writeLineToOutput(new Array(this.indenter.indentAmt + 5).join(" ") + name + " = __v[__i];");
+                this.omitBeginParen = true;
+                addEndParen = statement.statement.kind() !== SyntaxKind.Block;
+            }
+
             this.emitBlockOrStatement(statement.statement);
+            this.omitBeginParen = false;
+            
+            if (addEndParen) {
+                this.writeLineToOutput("}");
+            }
+            
             this.recordSourceMappingEnd(statement);
         }
 
@@ -3329,9 +3366,11 @@ module TypeScript {
                 text = text.substr(1, text.length - 2);
                 text = '"' + text.replace(/"/g, '\\"') + '"';
                 text = text.replace(/(\r?\n)/g, '\\n" +$1"');
-                text = text.replace(/(\\*)\$\{([^}]+)\}/g, function(literal, slashes, expression) {
+                text = text.replace(/(\\*)\$\{([^}]+)\}/g, (literal, slashes, expression) => {
                     if (slashes.length % 2) {
                         return literal.substr(1);
+                    } else if (this.inArrowFunction) {
+                        expression = expression.replace(/\bthis\b/, "_this");
                     }
 
                     return slashes + '" + (' + expression + ') + "';

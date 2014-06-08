@@ -30,6 +30,7 @@ module TypeScript.Services {
             "implements",
             "import",
             "in",
+            "of",
             "instanceof",
             "interface",
             "module",
@@ -64,7 +65,8 @@ module TypeScript.Services {
                     completions.push(entry);
                 }
 
-                KeywordCompletions.keywordCompletions = completions;            }
+                KeywordCompletions.keywordCompletions = completions;
+            }
 
             return KeywordCompletions.keywordCompletions;
         }

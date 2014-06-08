@@ -494,7 +494,8 @@ module TypeScript.Services.Formatting {
                     return context.currentTokenSpan.kind() === SyntaxKind.EqualsToken || context.nextTokenSpan.kind() === SyntaxKind.EqualsToken;
                 // "in" keyword in for (var x in []) { }
                 case SyntaxKind.ForInStatement:
-                    return context.currentTokenSpan.kind() === SyntaxKind.InKeyword || context.nextTokenSpan.kind() === SyntaxKind.InKeyword;
+                    return context.currentTokenSpan.kind() === SyntaxKind.InKeyword || context.nextTokenSpan.kind() === SyntaxKind.InKeyword ||
+                           context.currentTokenSpan.kind() === SyntaxKind.OfKeyword || context.nextTokenSpan.kind() === SyntaxKind.OfKeyword;
             }
             return false;
         }

@@ -22,6 +22,11 @@ module TypeScript {
                 default:
                     return SyntaxKind.IdentifierName;
                 }
+            case CharacterCodes.o:
+                // of
+                if (array[startIndex + 1] == CharacterCodes.f) {
+                    return SyntaxKind.OfKeyword;
+                }
 
             default:
                 return SyntaxKind.IdentifierName;

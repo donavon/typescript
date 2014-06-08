@@ -1289,7 +1289,7 @@ module TypeScript {
             this.movePast(node.closeParenToken);
             var body = node.statement.accept(this);
 
-            var result = new ForInStatement(variableDeclaration, left, expression, body);
+            var result = new ForInStatement(variableDeclaration, left, expression, body, node.inKeyword);
             this.setSpan(result, start, node);
 
             return result;
