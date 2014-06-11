@@ -3544,7 +3544,7 @@ module TypeScript.Parser {
                 // Check for binary expressions.
                 if (SyntaxFacts.isBinaryExpressionOperatorToken(token0Kind)) {
                     // also, if it's the 'in' operator, only allow if our caller allows it.
-                    if (!allowIn && (token0Kind === SyntaxKind.InKeyword || SyntaxKind.OfKeyword)) {
+                    if (!allowIn && (token0Kind === SyntaxKind.InKeyword || token0Kind === SyntaxKind.OfKeyword)) {
                         break;
                     }
 

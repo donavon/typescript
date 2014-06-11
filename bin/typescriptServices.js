@@ -24357,7 +24357,7 @@ var TypeScript;
                     var token0Kind = token0.tokenKind;
 
                     if (TypeScript.SyntaxFacts.isBinaryExpressionOperatorToken(token0Kind)) {
-                        if (!allowIn && (token0Kind === 29 /* InKeyword */ || 30 /* OfKeyword */)) {
+                        if (!allowIn && (token0Kind === 29 /* InKeyword */ || token0Kind === 30 /* OfKeyword */)) {
                             break;
                         }
 
