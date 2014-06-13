@@ -1758,6 +1758,8 @@ var TypeScript;
         if (typeof WScript !== "undefined" && typeof ActiveXObject === "function") {
             return getWindowsScriptHostEnvironment();
         } else if (typeof module !== 'undefined' && module.exports) {
+            module.exports = TypeScript;
+
             return getNodeEnvironment();
         } else {
             return null;
