@@ -227,6 +227,7 @@ module TypeScript {
         private exportAssignment: ExportAssignment = null;
         private inWithBlock = false;
         private omitBeginParen = false;
+        private forOfNumber = 1;
 
         public document: Document = null;
 
@@ -3187,8 +3188,15 @@ module TypeScript {
             this.recordSourceMappingStart(statement);
             var isInKeyword = statement.inOrOf.tokenKind === SyntaxKind.InKeyword;
             
+            if (!isInKeyword) {
+                var i = '__i' + this.forOfNumber;
+                var v = '__v' + this.forOfNumber;
+                var l = '__l' + this.forOfNumber;
+                this.forOfNumber++;
+            }
+                
             if (statement.left && !isInKeyword) {
-                this.writeToOutput("var __i, __e, __l;");
+                this.writeToOutput("var " + i + ", " + v + ", " + l + ";");
             }
             
             this.writeToOutput("for (");
@@ -3206,7 +3214,7 @@ module TypeScript {
                 this.emit(statement.expression);
                 this.writeToOutput(")");
             } else {
-                this.writeToOutput(", __i = 0, __v = ");
+                this.writeToOutput(", " + i + " = 0, " + v + " = ");
                 this.emit(statement.expression);
                 
                 if (statement.left) {
@@ -3217,8 +3225,8 @@ module TypeScript {
                     var name = declarator.propertyName.text();
                 }
 
-                this.writeLineToOutput(", __l = __v.length; __i < __l; __i++) {");
-                this.writeLineToOutput(new Array(this.indenter.indentAmt + 5).join(" ") + name + " = __v[__i];");
+                this.writeLineToOutput(", " + l + " = " + v + ".length; " + i + " < " + l + "; " + i + "++) {");
+                this.writeLineToOutput(new Array(this.indenter.indentAmt + 5).join(" ") + name + " = " + v + "[" + i + "];");
                 this.omitBeginParen = true;
                 addEndParen = statement.statement.kind() !== SyntaxKind.Block;
             }

@@ -29725,6 +29725,7 @@ var TypeScript;
             this.exportAssignment = null;
             this.inWithBlock = false;
             this.omitBeginParen = false;
+            this.forOfNumber = 1;
             this.document = null;
             this.detachedCommentsElement = null;
         }
@@ -32409,8 +32410,15 @@ var TypeScript;
             this.recordSourceMappingStart(statement);
             var isInKeyword = statement.inOrOf.tokenKind === 29 /* InKeyword */;
 
+            if (!isInKeyword) {
+                var i = '__i' + this.forOfNumber;
+                var v = '__v' + this.forOfNumber;
+                var l = '__l' + this.forOfNumber;
+                this.forOfNumber++;
+            }
+
             if (statement.left && !isInKeyword) {
-                this.writeToOutput("var __i, __e, __l;");
+                this.writeToOutput("var " + i + ", " + v + ", " + l + ";");
             }
 
             this.writeToOutput("for (");
@@ -32427,7 +32435,7 @@ var TypeScript;
                 this.emit(statement.expression);
                 this.writeToOutput(")");
             } else {
-                this.writeToOutput(", __i = 0, __v = ");
+                this.writeToOutput(", " + i + " = 0, " + v + " = ");
                 this.emit(statement.expression);
 
                 if (statement.left) {
@@ -32438,8 +32446,8 @@ var TypeScript;
                     var name = declarator.propertyName.text();
                 }
 
-                this.writeLineToOutput(", __l = __v.length; __i < __l; __i++) {");
-                this.writeLineToOutput(new Array(this.indenter.indentAmt + 5).join(" ") + name + " = __v[__i];");
+                this.writeLineToOutput(", " + l + " = " + v + ".length; " + i + " < " + l + "; " + i + "++) {");
+                this.writeLineToOutput(new Array(this.indenter.indentAmt + 5).join(" ") + name + " = " + v + "[" + i + "];");
                 this.omitBeginParen = true;
                 addEndParen = statement.statement.kind() !== 147 /* Block */;
             }

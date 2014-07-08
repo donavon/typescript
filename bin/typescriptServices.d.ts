@@ -5106,6 +5106,7 @@ declare module TypeScript {
         private exportAssignment;
         private inWithBlock;
         private omitBeginParen;
+        private forOfNumber;
         public document: Document;
         private detachedCommentsElement;
         constructor(emittingFileName: string, outfile: TextWriter, emitOptions: EmitOptions, semanticInfoChain: SemanticInfoChain);
