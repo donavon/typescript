@@ -4464,10 +4464,17 @@ module TypeScript.Parser {
             // Debug.assert(this.isSimplePropertyAssignment(/*inErrorRecovery:*/ false));
 
             var propertyName = this.eatPropertyName();
-            var colonToken = this.eatToken(SyntaxKind.ColonToken);
-            var expression = this.parseAssignmentExpression(/*allowIn:*/ true);
-
-            return this.factory.simplePropertyAssignment(propertyName, colonToken, expression);
+            var tokenKind = this.currentToken().tokenKind;
+            
+            if (tokenKind === SyntaxKind.CommaToken || tokenKind === SyntaxKind.CloseBraceToken) {
+                return this.factory.simplePropertyAssignment(propertyName, new TypeScript.Syntax.FixedWidthTokenWithNoTrivia(SyntaxKind.ColonToken), propertyName);
+            }
+            
+            return this.factory.simplePropertyAssignment(
+                propertyName,
+                this.eatToken(SyntaxKind.ColonToken),
+                this.parseAssignmentExpression(/*allowIn:*/ true)
+            );
         }
 
         private isPropertyName(token: ISyntaxToken, inErrorRecovery: boolean): boolean {

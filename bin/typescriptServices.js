@@ -25009,10 +25009,13 @@ var TypeScript;
 
             ParserImpl.prototype.parseSimplePropertyAssignment = function () {
                 var propertyName = this.eatPropertyName();
-                var colonToken = this.eatToken(107 /* ColonToken */);
-                var expression = this.parseAssignmentExpression(true);
+                var tokenKind = this.currentToken().tokenKind;
 
-                return this.factory.simplePropertyAssignment(propertyName, colonToken, expression);
+                if (tokenKind === 80 /* CommaToken */ || tokenKind === 72 /* CloseBraceToken */) {
+                    return this.factory.simplePropertyAssignment(propertyName, new TypeScript.Syntax.FixedWidthTokenWithNoTrivia(107 /* ColonToken */), propertyName);
+                }
+
+                return this.factory.simplePropertyAssignment(propertyName, this.eatToken(107 /* ColonToken */), this.parseAssignmentExpression(true));
             };
 
             ParserImpl.prototype.isPropertyName = function (token, inErrorRecovery) {
